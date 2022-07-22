@@ -24,13 +24,11 @@ signed main()
 		for(int j = i + 1; j < N; ++j)
 			swp.push_back({ i, j });
 	auto comp2 = [&](pair<int, int>& a, pair<int, int>& b) -> bool {
-		long long d = det(P[a.second].first - P[a.first].first, P[b.second].first -
-			P[b.first].first);
+		long long d = det(P[a.second].first - P[a.first].first, P[b.second].first - P[b.first].first);
 		if(d) return d > 0;
 		else
 		{
-			if(P[a.first].first != P[b.first].first) return P[a.first].first <
-				P[b.first].first;
+			if(P[a.first].first != P[b.first].first) return P[a.first].first < P[b.first].first;
 			return P[a.second].first < P[b.second].first;
 		}
 	};
@@ -38,8 +36,7 @@ signed main()
 	vector<pair<point, long long>> srt = P;
 	vector<int> pos(N); iota(pos.begin(), pos.end(), 0);
 	auto comp3 = [&](pair<int, int>& a, pair<int, int>& b) -> long long {
-		return det(P[a.second].first - P[a.first].first, P[b.second].first -
-			P[b.first].first);
+		return det(P[a.second].first - P[a.first].first, P[b.second].first - P[b.first].first);
 	};
 	for(int i = 0; i < (int)swp.size(); )
 	{
