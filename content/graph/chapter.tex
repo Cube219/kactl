@@ -16,10 +16,30 @@
 	\kactlimport{GlobalMinCut.h}
 	% \kactlimport{GomoryHu.h}
 
+	\subsection{Circulation}
+		정점에 수요, 공급 개념이 추가된다. 공급은 -(수요) 라고 생각하면 된다.\\
+		일단 양수 수요의 절대값 합과 음수 수요의 절댓값 합이 같아야 한다. 그 합을 D라 하자.\\
+		소스와 싱크를 만들고 소스에서 수요가 양수인 정점으로 간선을 잇고, 수요가 음수인 정점에서 싱크로 간선을 잇는다. 이제 최대 유량이 D이면 서큘레이션이 존재하는 것이다.
+
+	\subsection{LR Flow}
+		간선 (u, v)에 용량 R-L을 부여하고, u의 수요에 +L, v의 수요에 -L을 한다. 즉 간선에 이미 L이 흐르고 있다고 모델링을 해주는 것이다.\\
+		소스와 싱크가 있는 그래프에서 LR flow 구하기 새로운 소스와 싱크를 만든다. 기존 싱크에서 기존 소스로 용량이 무한대인 간선을 잇는다. 위 내용처럼 모델링을 해주고, 새로운 소스에서 새로운 싱크로의 최대 유량이 하한 L의 합과 같은지 보면 된다. 최대 유량을 구하고 싶다면 이렇게 구성한 유량 그래프에서 원래 소스에서 원래 싱크로 가는 유량을 찾을 수 있을 때까지 계속 찾으면 된다.
+	
+	\subsection{empty}
+
+
 \section{Matching}
 	\kactlimport{hopcroftKarp.h}
 	% \kactlimport{DFSMatching.h}
 	\kactlimport{MinimumVertexCover.h}
+
+	\subsection{Bipartitie Graph}
+		Minimum Vertex Cover = 모든 간선과 인접한 최소 정점 집합의 크기 = 최대 이분 매칭\\
+		Maximum Independent Set = 어떤 두 정점도 인접하지 않은 최대 정점 집합 = minimum vertex cover 의 여집합\\
+		Minimum Path Cover = 각 경로의 정점이 겹치지 않으면서 모든 정점을 커버하는 최소 경로 집합의 크기 = 전체 정점 수 - 각 노드를 in, out으로 분할한 최대 이분매칭(indegree ≤ 1, outdegree ≤ 1 임을 이용)(매칭 수는 간선 개수와 같고 경로 개수는 정점 수 - 간선 수와 같다)\\
+		Anti-Chain(반사슬) = 반사슬 내의 어떤 두 정점도 위상이 없음\\
+		Maximum Anti-Chain의 크기 = Minimum Path Cover = vertex cover 의 여집합
+
 	% \kactlimport{DFSMatching-PO.h}
 	\kactlimport{WeightedMatching.h}
 	% \kactlimport{GeneralMatching.h}
