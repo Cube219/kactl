@@ -1,82 +1,46 @@
 /**
- * Author: ohsolution
- * Date: 2021-10-08
+ * Author: Cube219
+ * Date: 2022-07-22
  * Description:
  */
 
-vector<pair<int,int>> adj[max_v]; // nxt, dist pair
-int vist[max_v],sz[max_v];
-int cp[max_v]; // centroid tree parent
-
-// caution: when using hld together, it must not overlap with the sz array used in hld
-int dfsz(int u, int par = -1) {	
-	sz[u] = 1;
-	for (auto& v : adj[u]) if (v.first != par && !vist[v.first]) sz[u] += dfsz(v.first, u);
-	return sz[u];
-}
-
-int fc(int u, int csz, int par = -1){
-	for (auto& v : adj[u]) if (v.first != par && !vist[v.first] && sz[v.first] > csz) return fc(v.first, csz, u);
-	return u;
-}
-
-void go(int u,int trp){
-	int csz = dfsz(u);
-	int cen = fc(u, csz/2); // find centroid
-
-	vist[cen] = 1;
-	cp[cen] = trp; // setting parent centroid of cur cen
-
-	vector<int> cur; 
-	// After collecting the information of the subtrees into a map in several places with centroid as a disconnect point,
-	// the merge can be performed on the logn.
-
-	function<void(int,int)> getsub = [&](int u,int par) {
-		cur.push_back(u);
-		for (auto& v : adj[u]) if (v.first != par && !vist[v.first]) getsub(v.first, u);
-	};
-
-	for (auto& v : adj[cen]) if (!vist[v.first]) { 
-		getsub(v.first, u);
-		for (auto& x : cur) cout << x << " "; // print v.first subtree node
-		cur.clear();
+vector<int> sz(n);
+vector<char> visit(n, false);
+auto getsz = [&](auto&& self, int cur, int pre) -> int {
+	sz[cur] = 1;
+	for(int nxt : g[cur]) {
+		if(nxt == pre || visit[nxt]) continue;
+		sz[cur] += self(self, nxt, cur);
 	}
-
-	for (auto& v : adj[cen]) if (!vist[v.first]) go(v.first,cen); // go nxt centroid
-}
-
-// When given a white vertex v, the shortest distance from the other vertex.
-int color[max_v];
-multiset <int> xset[max_v]; // The set that collects the distances of the white vertices from the vertex.
-int p[20][max_v],d[max_v];
-
-int getdist(int u, int v) {
-	return d[u] + d[v] - 2 * d[lca(u, v)];
-}
-
-// Change the color of node v of the centroid tree update.
-void upd(int v) {	
-	color[v] = !color[v];
-	int i = v;
-	int ct = 0;
-	while (~i) {	
-		int dist = getdist(i, v);
-		if (color[v]) xset[i].insert(dist); // if color is white than ins
-		else xset[i].erase(xset[i].find(dist)); // if changed color is black then erase
-		i = cp[i]; // move to parent cent
+	return sz[cur];
+};
+auto getcen = [&](auto&& self, int cur, int pre, int size) -> int {
+	for(int nxt : g[cur]) {
+		if(nxt == pre || visit[nxt]) continue;
+		if(sz[nxt] > size / 2) return self(self, nxt, cur, size);
 	}
-}
+	return cur;
+};
 
-// Centroid tree query. Find the black vertex v and the shortest white vertex.
-int query(int v) {
-	int i = v;
-	int ret = INF;
-	int ct = 0;
-	while (~i) {		
-		int dist = getdist(i, v); // distance with current cent to v
-		if (xset[i].size()) ckmin(ret, dist + *xset[i].begin()); // saved white point distance
-		i = cp[i];
+auto search = [&](auto&& self, int cur, int pre) -> void {
+	for(int nxt : g[cur]) {
+		if(nxt == pre || visit[nxt]) continue;
+		self(self, nxt, cur);
 	}
+};
 
-	return ret == INF ? -1 : ret;
-}
+vector<int> cenPar(n);
+auto centroid = [&](auto&& self, int cur, int pre) -> void {
+	int sz = getsz(getsz, cur, -1);
+	int cen = getcen(getcen, cur, -1, sz);
+
+	visit[cen] = true;
+	cenPar[cen] = pre;
+	search(search, cen, -1);
+
+	for(int nxt : g[cen]) {
+		if(nxt == pre || visit[nxt]) continue;
+		self(self, nxt, cen);
+	}
+};
+centroid(centroid, 0, -1);

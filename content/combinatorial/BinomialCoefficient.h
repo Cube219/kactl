@@ -3,45 +3,46 @@
  * Date: 2021-10-07
  * License: CC0
  * Description: Finds binomial coefficient. MOD must be prime.
- * Usage:
- *  MAXN < MOD -> init(); bi_coeff(n, r)
- *  MAXN > MOD -> MAXN = MOD; init(); bi_coeff_lucas(n, r);
- * Time:
- *  MAXN < MOD -> O(N) when init, O(1) to get
- *  MAXN > MOD -> O(MOD) when init, O(logN) to get
  */
 #pragma once
 
-constexpr ll MAXN = 1000000, MOD = 1000000007;
-ll fact[MAXN + 1], invfact[MAXN + 1];
-ll pw(ll a, ll b) {
-	ll res = 1;
-	while(b > 0) {
-		if(b & 1) res = res * a % MOD;
-		a = a * a % MOD;
-		b >>= 1;
+template <int mod>
+struct BiCoeff
+{
+	vector<ll> fact, invfact;
+
+	BiCoeff(int n) : fact(n + 1), invfact(n + 1) {
+		fact[0] = 1;
+		for(int i = 1; i <= n; ++i) fact[i] = fact[i - 1] * i % mod;
+		invfact[n] = pw(fact[n], mod - 2);
+		for(int i = n - 1; i >= 0; --i) invfact[i] = invfact[i + 1] * (i + 1) % mod;
 	}
-	return res;
-}
-void init(){
-	fact[0] = 1;
-	for(int i = 1; i <= MAXN; ++i) fact[i] = fact[i - 1] * i % MOD;
-	invfact[MAXN] = pw(fact[MAXN], MOD - 2);
-	for(int i = MAXN - 1; i >= 0; --i) invfact[i] = invfact[i + 1] * (i + 1) % MOD;
-}
-ll bi_coeff(int n, int r) {
-	ll factn = fact[n];
-	ll invrnr = invfact[r] * invfact[n - r] % MOD;
-	return factn * invrnr % MOD;
-}
-ll bi_coeff_lucas(ll n, ll r) {
-	ll res = 1;
-	while(n > 0 || r > 0) {
-		ll a = n % MOD;
-		ll b = r % MOD;
-		res *= bi_coeff(a, b);
-		res %= MOD;
-		n /= MOD; r /= MOD;
+
+	ll pw(ll a, ll b) {
+		ll res = 1;
+		while(b > 0) {
+			if(b & 1) res = res * a % mod;
+			a = a * a % mod;
+			b >>= 1;
+		}
+		return res;
 	}
-	return res;
-}
+
+	ll get(int n, int r) {
+		return fact[n] * (invfact[r] * invfact[n - r] % mod) % mod;
+	}
+
+	ll get_lucas(ll n, ll r) {
+		ll res = 1;
+		while(n > 0 || r > 0) {
+			ll a = n % mod;
+			ll b = r % mod;
+			res *= ncr(a, b);
+			res %= mod;
+
+			n /= mod;
+			r /= mod;
+		}
+		return res;
+	}
+};

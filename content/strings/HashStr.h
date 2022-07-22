@@ -1,6 +1,6 @@
 /**
  * Author: Cube219
- * Date: 2021-10-07
+ * Date: 2022-07-22
  * License: CC0
  * Description: Get substring of hash.
  * Time: $O(n) when init, O(1) to get$
@@ -10,11 +10,11 @@
 #pragma once
 
 template <ll h1 = 3137, ll m1 = 998244353, ll h2 = 53, ll m2 = 1610612741>
-struct StrHash {
+struct HashStr {
 	vector<ll> hv, hpow;
 	vector<ll> hv2, hpow2;
 
-	void build(const string& str) {
+	HashStr(const string& str) {
 		int n = str.size();
 		hv.resize(n);
 		hpow.resize(n);
@@ -39,16 +39,16 @@ struct StrHash {
 
 	// [l, r]
 	ll substr(int l, int r) {
-		ll res = hv[r-1];
+		ll res = hv[r];
 		if(l > 0) {
-			res -= hv[l - 1] * hpow[r - l];
+			res -= hv[l - 1] * hpow[r - l + 1];
 			res = ((res % m1) + m1) % m1;
 		}
-		ll res2 = hv2[r-1];
+		ll res2 = hv2[r];
 		if(l > 0) {
-			res2 -= hv2[l - 1] * hpow2[r - l];
+			res2 -= hv2[l - 1] * hpow2[r - l + 1];
 			res2 = ((res2 % m2) + m2) % m2;
 		}
-		return (res << 32) | res2;
+		return res << 32 | res2;
 	}
 };

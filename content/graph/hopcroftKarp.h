@@ -1,70 +1,47 @@
 /**
- * Author: ohsolution
- * Date: 2021-10-08
- * Description: 
+ * Author: Cube219
+ * Date: 2022-07-22
+ * Description: Hopcroft-Karp algorithm for bipartite matching.
  * Time: O(\sqrt{V}E)
  */
 #pragma once
 
-vector <int> adj[max_v];
-int n,m, match[max_v], dist[max_v];
-
-bool bfs() {
-	queue<int>bq;
-	fa(i, 1, n + 1) {
-		if (!match[i]) dist[i] = 0, bq.push(i);
-		else dist[i] = INF;
+vector<int> a(n, -1), b(m, -1), level(n);
+auto initLevel = [&]() {
+	queue<int> q;
+	for(int i = 0; i < n; ++i) {
+		if(a[i] == -1) {
+			q.push(i);
+			level[i] = 0;
+		} else level[i] = -1;
 	}
-
-	dist[0] = INF;
-
-	while (bq.size()) {
-		int u = bq.front(); bq.pop();
-
-		if (u) for (auto& x : adj[u]){
-			if (dist[match[x]] == INF) {
-				dist[match[x]] = dist[u] + 1;
-				bq.push(match[x]);
+	while(!q.empty()) {
+		int cur = q.front(); q.pop();
+		for(int nxt : g[cur]) {
+			if(b[nxt] != -1 && level[b[nxt]] == -1) {
+				level[b[nxt]] = level[cur] + 1;
+				q.push(b[nxt]);
 			}
 		}
 	}
-
-	return dist[0] != INF;
-}
-
-bool dfs(int u) {
-	if (!u) return true;
-
-	for (auto& x : adj[u]) {
-		if (dist[match[x]] == dist[u] + 1 && dfs(match[x])) {
-			match[x] = u, match[u] =x;
+};
+auto dfs = [&](auto&& self, int cur) -> bool {
+	for(int nxt : g[cur]) {
+		if(b[nxt] == -1 || (level[b[nxt]] == level[cur] + 1 && self(self, b[nxt]))) {
+			a[cur] = nxt;
+			b[nxt] = cur;
 			return true;
 		}
 	}
-
-	dist[u] = INF;
 	return false;
-}
-
-int main() {	
-	ci(n >> m);
-
-	// match i(left) to i+n(right)
-	fa(i, 1, n + 1) {
-		int x; ci(x); 
-		while (x--) {
-			int y; ci(y); y += n;
-			adj[i].push_back(y);
-		}
+};
+int flow = 0;
+while(1) {
+	initLevel();
+	int f = 0;
+	for(int i = 0; i < n; ++i) {
+		if(a[i] == -1 && dfs(dfs, i)) f++;
 	}
-
-	int ans = 0;
-
-	while (bfs()) {
-		fa(i, 1, n + 1) if (!match[i] && dfs(i)) ++ans;
-	}
-
-	co(ans);
-
-	return 0;
+	if(f == 0) break;
+	flow += f;
 }

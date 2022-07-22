@@ -1,67 +1,71 @@
 /**
- * Author: someone on Codeforces
- * Date: 2017-03-14
- * Source: folklore
+ * Author: Cube219
+ * Date: 2022-07-22
  * Description: A short self-balancing tree. It acts as a
  *  sequential container with log-time splits/joins, and
  *  is easy to augment with additional data.
  * Time: $O(\log N)$
- * Status: stress-tested
  */
 #pragma once
 
-struct Node {
-	Node *l = 0, *r = 0;
-	int val, y, c = 1;
-	Node(int val) : val(val), y(rand()) {}
-	void recalc();
+struct Treap {
+	Treap *l, *r;
+	int pri, sz;
+	int v;
+
+	Treap() = default;
+	Treap(int _v) {
+		l = r = nullptr;
+		pri = getRandom();
+		v = _v;
+		sz = 1;
+	}
+	~Treap() {
+		delete l;
+		delete r;
+	}
+
+	void update() {
+		sz = 1;
+		if(l) sz += l->sz;
+		if(r) sz += r->sz;
+		push();
+	}
+	void push() { }
 };
 
-int cnt(Node* n) { return n ? n->c : 0; }
-void Node::recalc() { c = cnt(l) + cnt(r) + 1; }
+// sz == left treap size
+pair<Treap*, Treap*> split(Treap* rt, int sz) {
+	if(!rt) return { 0, 0 };
+	rt->push();
 
-template<class F> void each(Node* n, F f) {
-	if (n) { each(n->l, f); f(n->val); each(n->r, f); }
-}
-
-pair<Node*, Node*> split(Node* n, int k) {
-	if (!n) return {};
-	if (cnt(n->l) >= k) { // "n->val >= k" for lower_bound(k)
-		auto pa = split(n->l, k);
-		n->l = pa.second;
-		n->recalc();
-		return {pa.first, n};
+	int lsz = rt->l ? rt->l->sz : 0;
+	if(lsz + 1 <= sz) {
+		auto [l, r] = split(rt->r, sz - lsz - 1);
+		rt->r = l;
+		rt->update();
+		return { rt, r };
 	} else {
-		auto pa = split(n->r, k - cnt(n->l) - 1); // and just "k"
-		n->r = pa.first;
-		n->recalc();
-		return {n, pa.second};
+		auto [l, r] = split(rt->l, sz);
+		rt->l = r;
+		rt->update();
+		return { l, rt };
 	}
 }
 
-Node* merge(Node* l, Node* r) {
-	if (!l) return r;
-	if (!r) return l;
-	if (l->y > r->y) {
-		l->r = merge(l->r, r);
-		l->recalc();
-		return l;
-	} else {
+Treap* merge(Treap* l, Treap* r) {
+	if(!l) return r;
+	if(!r) return l;
+	l->push();
+	r->push();
+
+	if(l->pri < r->pri) {
 		r->l = merge(l, r->l);
-		r->recalc();
+		r->update();
 		return r;
+	} else {
+		l->r = merge(l->r, r);
+		l->update();
+		return l;
 	}
-}
-
-Node* ins(Node* t, Node* n, int pos) {
-	auto pa = split(t, pos);
-	return merge(merge(pa.first, n), pa.second);
-}
-
-// Example application: move the range [l, r) to index k
-void move(Node*& t, int l, int r, int k) {
-	Node *a, *b, *c;
-	tie(a,b) = split(t, l); tie(b,c) = split(b, r - l);
-	if (k <= l) t = merge(ins(a, b, k), c);
-	else t = merge(a, ins(c, b, k - r));
 }

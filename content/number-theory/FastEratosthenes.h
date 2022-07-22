@@ -1,30 +1,41 @@
 /**
- * Author: ohsolution
- * Date: 2021-10-08
+ * Author: max804
+ * Date: 2022-07-13
  * License: CC0
- * Description: Prime sieve for generating all primes smaller than LIM.
+ * Description: Prime sieve for generating all primes smaller than n.
  * Time: O(N)
  */
 #pragma once
 
-const int LIM = 1e6;
-vector<int> pr; // prime set
-int sp[LIM]; // minimum prime
-int cnt[LIM]; // 2 ^ (prime_num)?
-int mu[LIM]; // Mobius
+vector<int> minFactor, mobius, primes, phi;
 
-void get_sieve()
+void initSieve(int n)
 {
-	cnt[1] = 1;
-	mu[1] = 1;
-	for(int i = 2; i < LIM; ++i) {
-		if(!sp[i]) pr.push_back(i), cnt[i] = 2, mu[i] = -1;
-		for(auto& x : pr) {
-			if(x * i >= LIM) break;
-			sp[x * i] = x;
-			cnt[x * i] = i % x == 0 ? cnt[i] : cnt[i] + 1;
-			mu[x * i] = (i % x != 0) * (-mu[i]);
-			if(i % x == 0) break;
+	minFactor.resize(n + 1, 0);
+	mobius.resize(n + 1, 0);
+	mobius[1] = 1;
+	for(int i = 2; i <= n; i++) {
+		if(minFactor[i] == 0) {
+			minFactor[i] = i;
+			primes.push_back(i);
+		}
+		for(int p : primes) {
+			if(i * p > n) break;
+			minFactor[i * p] = p;
+			mobius[i * p] = (i % p != 0) * (-mobius[i]);
+			if(i % p == 0) break;
 		}
 	}
+
+	// euler phi
+	phi.resize(n + 1, 0);
+	iota(phi.begin(), phi.end(), 0);
+	for(int i = 2; i <= n; ++i) {
+		if(minFactor[i] != i) continue;
+		for(int j = 1; j * i <= n; ++j) {
+			phi[i * j] = (i - 1) * (phi[i * j] / i);
+		}
+	} 
 }
+
+// phi[i] = (p^a - p^(a-1))...

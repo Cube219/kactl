@@ -1,46 +1,52 @@
 /**
- * Author: ohsolution
- * Date: 2021-10-08
- * Description:
- * Usage:
+ * Author: Cube219
+ * Date: 2022-07-22
+ * Description: Finds all biconnected components in an undirected graph, and
+ *  runs a callback for the edges in each.
  * Time: O(E + V)
  */
 #pragma once
 
-int dfn[max_v], low[max_v], cn, ccn;
-vector<int> adj[max_v];
-vector<vector<int>> bcc;
+vector<vector<pair<int, int>>> bcc;
+vector<int> d(n, 0), isCut(n, false);
 vector<pair<int, int>> st;
+int dNum;
+auto dfs = [&](auto&& self, int cur, int pre) -> int {
+	d[cur] = ++dNum;
 
-function<void(int, int)> dfs = [&](int u, int p)
-{
-	dfn[u] = low[u] = cn++;
+	int ret = d[cur];
+	for(int nxt : g[cur]) {
+		if(nxt == pre) continue;
 
-	for (auto& v : adj[u]) if (v != p)
-	{
-		if (dfn[v] < dfn[u]) st.push_back({ u,v });
-
-		if (dfn[v]) ckmin(low[u], dfn[v]);
-		else
-		{
-			dfs(v, u);
-			ckmin(low[u], low[v]);
-			if (low[v] >= dfn[u])
-			{
-				if (st.back().first == u && st.back().second == v) bcc[ccn].push_back(v);
-
-				while (1)
-				{
-					pair<int,int> cur = st.back(); st.pop_back();
-					bcc[ccn].push_back(cur.first);
-					if (cur.first == u && cur.second == v) break;
-				}
-
-				++ccn;
-			}
-
+		if(d[nxt] == 0 || d[cur] > d[nxt]) {
+			st.push_back({ cur, nxt });
 		}
-	}
-};
 
-for(int i=0;i<n;++i) if (!dfn[i]) dfs(i, -1);
+		if(d[nxt] == 0) {
+			int t = self(self, nxt, cur);
+			if(t >= d[cur]) {
+				if(d[cur] != 0 || d[nxt] > 1) isCut[cur] = true;
+
+				bcc.push_back({});
+				vector<pair<int, int>>& cbcc = bcc.back();
+				while(1) {
+					auto top = st.back();
+					st.pop_back();
+
+					cbcc.push_back(top);
+					if(top.first == cur) break;
+				}
+			}
+			ret = min(ret, t);
+		} else ret = min(ret, d[nxt]);
+	}
+
+	return ret;
+};
+for(int i = 0; i < n; ++i) {
+	if(d[i] == 0) {
+		dNum = 0;
+		dfs(dfs, i, -1);
+	}
+}
+// bridges: bcc[i].size() == 1

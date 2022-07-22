@@ -1,50 +1,32 @@
 /**
- * Author: ohsolution
+ * Author: Cube219
  * 
- * Description: Divide and Conquar Optimization DP
+ * Description: Divide and Conquar Optimization DP example
  */
 #pragma once
 
-function<void(int, int, int, int, int)> dnc = [&](int lev, int l, int r, int s, int e) {
-	if (l > r || s > e) return;
+auto dnc = [&](auto&& self, int l, int r, int minj, int maxj) {
+	if(l > r) return;
 
-	int mid = l + r >> 1;
-	int opt = -1;
-	dp[lev][mid] = LNF;  
+	int i = (l + r) / 2;
 
-	fa(i, s, min(mid,e) + 1) {
-		LL t = dp[lev - 1][i] + cost(i + 1, mid);
-
-		if (dp[lev][mid] > t) {
-			dp[lev][mid] = t;
-			opt = i;
+	int midj = minj;
+	ll mn = INF;
+	int ed = min(maxj, i);
+	for(int j = minj; j <= ed; ++j) {
+		ll v = dp[1][j] + (sum[i] - sum[j]) * (i - j);
+		if(mn > v) {
+			mn = v;
+			midj = j;
 		}
 	}
-
-	dnc(lev, l, mid - 1, s, opt);
-	dnc(lev, mid + 1, r, opt, e);
+	dp[0][i] = mn;
+	self(self, l, i - 1, minj, midj);
+	self(self, i + 1, r, midj, maxj);
 };
 
-function<void(int, int, int, int)> dnc = [&](int l, int r, int s, int e) {
-	if (l > r ||s > e) return;
-
-	int mid = l + r >> 1;
-	int opt = -1;
-	LL maxi = -LNF;
-
-	fa(i, s, e+1) {
-		LL dx = b[i].first - a[mid].first;
-		LL dy = b[i].second - a[mid].second;
-
-		LL ret = (dx < 0 && dy < 0) ? 0 : dx * dy;
-
-		if (ret > maxi) {
-			maxi = ret;
-			opt = i;
-		}
-	}
-
-	ckmax(ans, maxi);
-
-	dnc(l, mid - 1, s, opt+1); dnc(mid + 1, r, opt-1, e);
-};
+for(int i = 0; i < g; ++i) {
+	dnc(dnc, 1, n, 0, n);
+	swap(dp[0], dp[1]);
+	fill(dp[0].begin() + 1, dp[0].end(), INF);
+}

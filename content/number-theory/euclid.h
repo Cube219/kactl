@@ -1,16 +1,26 @@
 /**
- * Author: Unknown
- * Date: 2002-09-15
- * Source: predates tinyKACTL
+ * Author: Cube219
+ * Date: 2022-07-22
  * Description: Finds two integers $x$ and $y$, such that $ax+by=\gcd(a,b)$. If
  * you just need gcd, use the built in \texttt{\_\_gcd} instead.
  * If $a$ and $b$ are coprime, then $x$ is the inverse of $a \pmod{b}$.
  */
 #pragma once
 
-ll euclid(ll a, ll b, ll &x, ll &y) {
-	if (!b) return x = 1, y = 0, a;
-	ll d = euclid(b, a % b, y, x);
-	return y -= a/b * x, d;
+struct ENode {
+	ll s, t, g;
+};
+
+ENode eeuc(ll a, ll b) {
+	if(b == 0) return { 1, 0, a };
+
+	ll r = a % b;
+	auto res = eeuc(b, r);
+	ll x = res.t;
+	ll y = res.s - a / b * res.t;
+	return { x, y, res.g };
 }
-// x2 = x + k * b/gcd(a,b) y2 = y - k * a/gcd(a,b)
+
+// Ax+By=C, D=gcd(A, B)=g
+// x0 = s * C/D       y0 = t * C/D
+// s = x0 + k * B/D   t = y0 - k * A/D
