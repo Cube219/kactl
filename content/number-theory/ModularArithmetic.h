@@ -8,8 +8,6 @@
  */
 #pragma once
 
-#include "euclid.h"
-
 const ll mod = 17; // change to something else
 struct Mod {
 	ll x;
@@ -19,8 +17,7 @@ struct Mod {
 	Mod operator*(Mod b) { return Mod((x * b.x) % mod); }
 	Mod operator/(Mod b) { return *this * invert(b); }
 	Mod invert(Mod a) {
-		ll x, y, g = euclid(a.x, mod, x, y);
-		assert(g == 1); return Mod((x + mod) % mod);
+		return a ^ (mod-2);
 	}
 	Mod operator^(ll e) {
 		if (!e) return Mod(1);
