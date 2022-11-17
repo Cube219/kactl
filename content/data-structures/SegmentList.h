@@ -7,21 +7,17 @@
  */
 #pragma once
 
-struct SegmentList
-{
-	struct Segment
-	{
+struct SegmentList {
+	struct Segment {
 		ll l, r, v;
 	};
 	map<ll, Segment> list;
 
-	SegmentList(ll mn, ll mx, ll v)
-	{
+	SegmentList(ll mn, ll mx, ll v) {
 		list.insert({ mn, { mn, mx, v } });
 	}
 
-	void insert(ll l, ll r, ll v)
-	{
+	void insert(ll l, ll r, ll v) {
 		auto stIt = prev(list.upper_bound(l));
 		if(stIt->second.l < l) {
 			Segment st = stIt->second;
@@ -52,4 +48,3 @@ struct SegmentList
 		list.insert({ s.l, s });
 	}
 };
-
