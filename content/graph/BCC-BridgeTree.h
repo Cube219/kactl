@@ -8,31 +8,25 @@
 
 vector<int> par(n);
 iota(par.begin(), par.end(), 0);
-auto find = [&](int a) {
-	vector<int> st;
-	while(par[a] != a) {
-		st.push_back(a);
-		a = par[a];
-	}
-	for(int v : st) par[v] = a;
-	return a;
+auto find = [&](int x) {
+	while(x != par[x]) x = par[x] = par[par[x]];
+	return x;
 };
 auto uni = [&](int a, int b) {
-	int ar = find(a);
-	int br = find(b);
-	if(ar == br) return;
-	par[br] = ar;
+	a = find(a); b = find(b);
+	if(a == b) return;
+	par[b] = a;
 };
-for(auto& bc : bcc) {
-	if(bc.size() == 1) continue;
-	for(auto& p : bc) uni(p.first, p.second);
+for(auto& bcc : bccs) {
+	if(bcc.size() == 1) continue;
+	for(auto [u, v] : bcc) uni(u, v);
 }
 vector<vector<int>> g2(n);
-for(auto& bc : bcc) {
-	if(bc.size() != 1) continue;
-	int a = find(bc[0].first);
-	int b = find(bc[0].second);
+for(auto& bcc : bccs) {
+	if(bcc.size() != 1) continue;
+	auto [u, v] = bcc[0];
+	u = find(u); v = find(v);
 
-	g2[a].push_back(b);
-	g2[b].push_back(a);
+	g[u].push_back(v);
+	g[v].push_back(u);
 }

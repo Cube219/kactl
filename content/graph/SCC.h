@@ -5,36 +5,34 @@
  * Description: Finds strongly connected components in a
  * directed graph. If vertices $u, v$ belong to the same component,
  * we can reach $u$ from $v$ and vice versa.
- * Usage: scc(g, n);
- * sccIdx[node] or sccs({0, 1, 3}, {2, 4}, ...)
  * Time: O(E + V)
  */
 #pragma once
 
-vector<vi> sccs;
-vi d, st, sccIdx;
-int dNum;
-int dfs(vector<vi>& g, int cur) {
-	d[cur] = dNum++;
+vector<vector<int>> sccs;
+vector<int> dep(n, -1), st, sccIdx(n);
+vector<char> finish(n, false);
+int dNum = 0;
+auto scc_dfs = [&](auto&& self, int cur) -> int {
+	dep[cur] = dNum++;
 	st.push_back(cur);
-	int ret = d[cur];
+
+	int ret = dep[cur];
 	for(int nxt : g[cur]) {
-		if(sccIdx[nxt] < 0) ret = min(ret, d[nxt] ? : dfs(g, nxt));
+		if(dep[nxt] == -1) ret = min(ret, self(self, nxt));
+		else if(!finish[nxt]) ret = min(ret, dep[nxt]);
 	}
-	if(ret == d[cur]) {
-		int top;
+	if(ret == dep[cur]) {
 		sccs.push_back({});
 		auto& scc = sccs.back();
-		do {
-			top = st.back(); st.pop_back();
+		while(1) {
+			int top = st.back(); st.pop_back();
 			scc.push_back(top);
-			sccIdx[top] = sccs.size();
-		} while(top != cur);
+			sccIdx[top] = sccs.size() - 1;
+			finish[top] = true;
+			if(top == cur) break;
+		}
 	}
 	return ret;
-}
-void scc(vector<vi>& g, int n)
-{
-	d.assign(n, 0); sccIdx.assign(n, -1); dNum = 1;
-	rep(i,0,n) if (sccIdx[i] < 0) dfs(g, i);
-}
+};
+for(int i = 0; i < n; ++i) if(dep[i] == -1) scc_dfs(scc_dfs, i);

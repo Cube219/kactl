@@ -7,46 +7,46 @@
  */
 #pragma once
 
-vector<vector<pair<int, int>>> bcc;
-vector<int> d(n, 0), isCut(n, false);
+vector<vector<pair<int, int>>> bccs;
+vector<int> dep(n, -1); int dNum;
+vector<char> isCut(n, false);
 vector<pair<int, int>> st;
-int dNum;
-auto dfs = [&](auto&& self, int cur, int pre) -> int {
-	d[cur] = ++dNum;
+auto bcc_dfs = [&](auto&& self, int cur, int pre) -> int {
+	dep[cur] = dNum++;
+	int ret = dep[cur];
+	int cNum = 0;
 
-	int ret = d[cur];
 	for(int nxt : g[cur]) {
 		if(nxt == pre) continue;
 
-		if(d[nxt] == 0 || d[cur] > d[nxt]) {
-			st.push_back({ cur, nxt });
-		}
-
-		if(d[nxt] == 0) {
+		if(dep[nxt] == -1 || dep[nxt] < dep[cur]) st.push_back({ cur, nxt });
+		if(dep[nxt] == -1) {
+			cNum++;
 			int t = self(self, nxt, cur);
-			if(t >= d[cur]) {
-				if(d[cur] != 0 || d[nxt] > 1) isCut[cur] = true;
+			if(t >= dep[cur]) {
+				if(dep[cur] > 0) isCut[cur] = true;
 
-				bcc.push_back({});
-				vector<pair<int, int>>& cbcc = bcc.back();
+				bccs.push_back({});
+				auto& bcc = bccs.back();
 				while(1) {
-					auto top = st.back();
-					st.pop_back();
+					auto eg = st.back(); st.pop_back();
+					bcc.push_back(eg);
 
-					cbcc.push_back(top);
-					if(top.first == cur) break;
+					if(eg.first == cur) break;
 				}
 			}
 			ret = min(ret, t);
-		} else ret = min(ret, d[nxt]);
+		} else ret = min(ret, dep[nxt]);
 	}
 
+	if(dep[cur] == 0 && cNum > 1) isCut[cur] = true;
 	return ret;
 };
+
 for(int i = 0; i < n; ++i) {
-	if(d[i] == 0) {
+	if(dep[i] == -1) {
 		dNum = 0;
-		dfs(dfs, i, -1);
+		bcc_dfs(bcc_dfs, i, -1);
 	}
 }
 // bridges: bcc[i].size() == 1
