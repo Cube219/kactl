@@ -10,29 +10,24 @@ struct CHT {
 	struct Line {
 		ll a, b; // y = ax + b
 	};
-
 	struct R {
 		ll u, d;
 		bool operator<=(const R& rhs) const {
 			return u * rhs.d <= rhs.u * d;
 		}
 	};
-
 	vector<Line> d;
 	int pos;
-
 	void clear() {
 		d.clear();
 		pos = 0;
 	}
-
 	R getx(const Line& a, const Line& b) {
 		ll u = b.b - a.b;
 		ll d = a.a - b.a;
 		ll g = gcd(u, d);
 		return { u / g, d / g };
 	}
-
 	void insert(ll a, ll b) {
 		Line cur = { a, b };
 		while(d.size() > 1) {
@@ -43,7 +38,6 @@ struct CHT {
 		}
 		d.push_back(cur);
 	}
-
 	ll get(ll x) {
 		R rx = { x, 1 };
 		int l = 0, r = d.size() - 1;
@@ -54,7 +48,6 @@ struct CHT {
 		}
 		return d[l].a * x + d[l].b;
 	}
-
 	ll get_mono(ll x) {
 		while(pos < d.size() - 1 && (d[pos].b - d[pos + 1].b) < x * (d[pos + 1].a - d[pos].a)) pos++;
 		return d[pos].a * x + d[pos].b;

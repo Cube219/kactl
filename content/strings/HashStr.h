@@ -3,7 +3,7 @@
  * Date: 2022-07-22
  * License: CC0
  * Description: Get substring of hash.
- * Time: $O(n) when init, O(1) to get$
+ * Time: O(n) when init, O(1) to get
  * Usage:
  *  HashStr hs(str); v = hs.substr(0, 10);
  */
